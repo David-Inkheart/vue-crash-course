@@ -1,7 +1,8 @@
 <template>
   <div class="container">
     <Header title="Task Tracker"/>
-    <Tasks :tasks="tasks" />
+    <Tasks @toggle-reminder="toggleReminder"  
+    @delete-task="deleteTask" :tasks="tasks" />
   </div>
 </template>
 
@@ -20,34 +21,44 @@ export default {
       tasks: []
     };
   },
-    created() {
-      this.tasks = [
-        {
-          id: 1,
-          text: "Eleanor's Paediatrician Appointment",
-          day: 'March 13th at 1:30pm',
-          reminder: true,
-        },
-        {
-          id: 2,
-          text: 'Dinner with Sunflower',
-          day: 'March 14th at 6:30pm',
-          reminder: true,
-        },
-        {
-          id: 3,
-          text: "Book club watch party",
-          day: 'March 17th at 8:30pm',
-          reminder: false,
-        },
-        {
-          id: 4,
-          text: "Metre repair",
-          day: 'March 22nd at 9:00am',
-          reminder: false,
-        },
-  ]
+  methods: {
+    deleteTask(id) {
+      if (confirm('Are you sure?'))
+      this.tasks = this.tasks.filter((task) => task.id !==id)
+    },
+    toggleReminder(id) {
+      this.tasks = this.tasks.map((task) => task.id === id ? 
+      {...task, reminder: !task.reminder} : task)
     }
+  },
+  created() {
+    this.tasks = [
+      {
+        id: 1,
+        text: "Eleanor's Paediatrician Appointment",
+        day: 'March 13th at 1:30pm',
+        reminder: true,
+      },
+      {
+        id: 2,
+        text: 'Dinner with Sunflower',
+        day: 'March 14th at 6:30pm',
+        reminder: true,
+      },
+      {
+        id: 3,
+        text: "Book club watch party",
+        day: 'March 17th at 8:30pm',
+        reminder: false,
+      },
+      {
+        id: 4,
+        text: "Metre repair",
+        day: 'March 22nd at 9:00am',
+        reminder: false,
+      },
+    ]
+  }
   };
 </script>
 
