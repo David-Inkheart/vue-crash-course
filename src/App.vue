@@ -1,82 +1,146 @@
 <template>
   <div class="container">
-    <Header @toggle-add-task="toggleAddTask"
-    title="Task Tracker" :showAddTask="showAddTask" />
+    <Header
+      @toggle-add-task="toggleAddTask"
+      title="Task Tracker"
+      :showAddTask="showAddTask"
+    />
     <div v-if="showAddTask">
-       <AddTask @add-task="addTask"/>
+      <AddTask @add-task="addTask" />
     </div>
-    <Tasks @toggle-reminder="toggleReminder"  
-    @delete-task="deleteTask" :tasks="tasks" />
+    <Tasks
+      @toggle-reminder="toggleReminder"
+      @delete-task="deleteTask"
+      @update-task="updateTask"
+      :tasks="tasks"
+    />
+
+    <router-view></router-view>
+    <Footer />
   </div>
 </template>
 
 <script>
-import Header from './components/Header'
-import Tasks from './components/Tasks'
-import AddTask from './components/AddTask'
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import Tasks from "./components/Tasks";
+import AddTask from "./components/AddTask";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     Header,
     Tasks,
     AddTask,
+    Footer,
   },
   data() {
     return {
       tasks: [],
-      showAddTask: false
+      showAddTask: false,
     };
   },
   methods: {
     toggleAddTask() {
-      this.showAddTask = !this.showAddTask 
+      this.showAddTask = !this.showAddTask;
     },
-    addTask(task) {
-      this.tasks = [...this.tasks, task]
+    async addTask(task) {
+      const res = await fetch("api/tasks", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(task),
+      });
+
+      const data = await res.json();
+
+      this.tasks = [...this.tasks, data];
     },
-    deleteTask(id) {
-      if (confirm('Are you sure?'))
-      this.tasks = this.tasks.filter((task) => task.id !==id)
+    async deleteTask(id) {
+      if (confirm("Are you sure?")) {
+        const res = await fetch(`api/tasks/${id}`, {
+          method: "DELETE",
+        });
+
+        res.status === 200
+          ? (this.tasks = this.tasks.filter((task) => task.id !== id))
+          : alert("Error deleting task");
+      }
     },
-    toggleReminder(id) {
-      this.tasks = this.tasks.map((task) => task.id === id ? 
-      {...task, reminder: !task.reminder} : task)
-    }
+    async toggleReminder(id) {
+      const taskToToggle = await this.fetchTask(id);
+      const updTask = { ...taskToToggle, reminder: !taskToToggle.reminder };
+
+      const res = await fetch(`api/tasks/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(updTask),
+      });
+
+      const data = await res.json();
+
+      this.tasks = this.tasks.map((task) =>
+        task.id === id ? { ...task, reminder: data.reminder } : task
+      );
+    },
+    async fetchTasks() {
+      const res = await fetch("api/tasks");
+
+      const data = await res.json();
+
+      return data;
+    },
+    async fetchTask(id) {
+      const res = await fetch(`api/tasks/${id}`);
+
+      const data = await res.json();
+
+      return data;
+    },
+    async updateTask(id) {
+      const taskUpdate = await this.fetchTask(id);
+      let text = taskUpdate.text;
+      let day = taskUpdate.day;
+      const textInput = window.prompt("Update task title:", taskUpdate.text);
+      if (textInput !== null) {
+        text = textInput;
+      }
+      const dayInput = window.prompt("Update day and time:", taskUpdate.day);
+      if (dayInput !== null) {
+        day = dayInput;
+      }
+      const editTask = {
+        ...taskUpdate,
+        text: text,
+        day: day,
+      };
+
+      const res = await fetch(`api/tasks/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(editTask),
+      });
+
+      const data = await res.json();
+
+      this.tasks = this.tasks.map((task) =>
+        task.id === id ? { ...task, text: data.text, day: data.day } : task
+      );
+    },
   },
-  created() {
-    this.tasks = [
-      {
-        id: 1,
-        text: "Eleanor's Paediatrician Appointment",
-        day: 'March 13th at 1:30pm',
-        reminder: true,
-      },
-      {
-        id: 2,
-        text: 'Dinner with Sunflower',
-        day: 'March 14th at 6:30pm',
-        reminder: true,
-      },
-      {
-        id: 3,
-        text: "Book club watch party",
-        day: 'March 17th at 8:30pm',
-        reminder: false,
-      },
-      {
-        id: 4,
-        text: "Metre repair",
-        day: 'March 22nd at 9:00am',
-        reminder: false,
-      },
-    ]
-  }
-  };
+  async created() {
+    this.tasks = await this.fetchTasks();
+  },
+};
 </script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400&display=swap");
 
 * {
   box-sizing: border-box;
@@ -85,7 +149,7 @@ export default {
 }
 
 body {
-  font-family: 'poppins', sans-serif;
+  font-family: "poppins", sans-serif;
 }
 
 .container {
@@ -114,7 +178,7 @@ body {
 
 .btn:focus {
   outline: none;
- } 
+}
 
 .btn:active {
   transform: scale(0.98);
@@ -124,5 +188,4 @@ body {
   display: block;
   width: 100%;
 }
-
 </style>
