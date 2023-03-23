@@ -3,7 +3,7 @@
     {
       "id": "1",
       "text": "Eleanor's Paediatrician Appointment",
-      "day": "March 13th at 1:30pm",
+      "day": "March 18th at 1:30pm",
       "reminder": false
     },
     {
@@ -23,6 +23,12 @@
       "text": "Metre repair",
       "day": "5pm sharp, Today",
       "reminder": true
+    },
+    {
+      "text": "This is a test task too",
+      "day": "today, 5pm prompt",
+      "reminder": false,
+      "id": "b3XyXlb"
     }
   ]
 }
