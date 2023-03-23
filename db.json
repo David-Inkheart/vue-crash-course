@@ -16,7 +16,7 @@
       "id": "3",
       "text": "Book club watch party",
       "day": "March 17th at 8:30pm",
-      "reminder": false
+      "reminder": true
     },
     {
       "id": "4",
